@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deel CoR Manual Approval Process</title>
+  <style>
+    :root {
+      --deel-blue: #1A1A2E;
+      --deel-purple: #6C47FF;
+      --deel-light-purple: #EDE9FF;
+      --deel-green: #00C48C;
+      --deel-red: #FF4757;
+      --deel-orange: #FF8C00;
+      --deel-yellow: #FFD166;
+      --deel-gray: #F4F5F7;
+      --deel-border: #E0E0E0;
+      --text-dark: #1A1A2E;
+      --text-mid: #5F6B7C;
+      --text-light: #fff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F0F2F8;
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--deel-blue);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; }
+    header p { font-size: 0.78rem; color: #A0A8C0; margin-top: 3px; }
+    .badge {
+      background: var(--deel-purple);
+      color: white;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .legend-bar {
+      background: white;
+      border-bottom: 1px solid var(--deel-border);
+      padding: 10px 40px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.72rem;
+      color: var(--text-mid);
+      font-weight: 500;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      padding: 20px 40px 0;
+    }
+    .tab {
+      padding: 10px 22px;
+      border-radius: 8px 8px 0 0;
+      background: #DDE1EE;
+      color: var(--text-mid);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid var(--deel-border);
+      border-bottom: none;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      background: white;
+      color: var(--deel-purple);
+      border-color: var(--deel-border);
+    }
+
+    .main {
+      padding: 0 40px 40px;
+    }
+
+    .panel {
+      display: none;
+      background: white;
+      border: 1px solid var(--deel-border);
+      border-radius: 0 8px 8px 8px;
+      padding: 36px;
+    }
+    .panel.active { display: block; }
+
+    /* ── FLOWCHART ── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      position: relative;
+    }
+
+    .section-label {
+      width: 100%;
+      max-width: 900px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      padding: 14px 0 6px;
+      border-top: 2px dashed #D0D5E8;
+      margin-top: 8px;
+    }
+    .section-label:first-child { border-top: none; padding-top: 0; }
+
+    .node {
+      width: 100%;
+      max-width: 620px;
+      border-radius: 10px;
+      padding: 14px 20px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1.5px solid transparent;
+      transition: box-shadow 0.2s;
+      cursor: default;
+    }
+    .node:hover { box-shadow: 0 4px 16px rgba(108,71,255,0.15); }
+
+    .node-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+    .node-sub {
+      color: var(--text-mid);
+      font-size: 0.76rem;
+    }
+    .node-pill {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* colours */
+    .n-trigger   { background: #EDE9FF; border-color: var(--deel-purple); }
+    .n-trigger .node-pill { background: var(--deel-purple); color: white; }
+    .n-action    { background: #EAF6F2; border-color: var(--deel-green); }
+    .n-action .node-pill { background: var(--deel-green); color: white; }
+    .n-check     { background: #FFF8E6; border-color: var(--deel-yellow); }
+    .n-check .node-pill { background: var(--deel-yellow); color: #7A5500; }
+    .n-escalate  { background: #FFF0F0; border-color: var(--deel-red); }
+    .n-escalate .node-pill { background: var(--deel-red); color: white; }
+    .n-info      { background: #F4F5F7; border-color: #C5CAD8; }
+    .n-info .node-pill { background: #C5CAD8; color: #444; }
+    .n-done      { background: #E6F9F4; border-color: var(--deel-green); }
+    .n-done .node-pill { background: var(--deel-green); color: white; }
+
+    /* connectors */
+    .arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+    }
+    .arrow-line {
+      width: 2px;
+      height: 24px;
+      background: #9CA3BD;
+    }
+    .arrow-head {
+      width: 0; height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #9CA3BD;
+    }
+    .arrow-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      color: var(--text-mid);
+      background: white;
+      border: 1px solid #D0D5E8;
+      border-radius: 4px;
+      padding: 2px 8px;
+      margin: 2px 0;
+    }
+
+    /* decision diamond */
+    .diamond-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 620px;
+    }
+    .diamond {
+      width: 200px;
+      height: 60px;
+      background: #FFF3E0;
+      border: 2px solid var(--deel-orange);
+      transform: perspective(200px) rotateX(0deg);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #8A3E00;
+      text-align: center;
+      position: relative;
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      width: 240px;
+      height: 90px;
+    }
+    .diamond span { transform: none; font-size: 0.78rem; padding: 0 30px; line-height: 1.3; }
+
+    .branch {
+      display: flex;
+      gap: 40px;
+      width: 100%;
+      max-width: 900px;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .branch-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .branch-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .yes-label { background: #E6F9F4; color: #007A5A; }
+    .no-label  { background: #FFF0F0; color: #B71C1C; }
+
+    /* checklist */
+    .checklist {
+      width: 100%;
+      max-width: 900px;
+    }
+    .check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .check-item {
+      background: white;
+      border: 1.5px solid var(--deel-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .check-item:hover { border-color: var(--deel-purple); box-shadow: 0 2px 8px rgba(108,71,255,0.1); }
+    .check-item h4 { font-size: 0.82rem; margin-bottom: 4px; color: var(--text-dark); }
+    .check-item ul { padding-left: 14px; color: var(--text-mid); }
+    .check-item .flag { color: var(--deel-orange); font-weight: 600; }
+    .check-item .escalate { color: var(--deel-red); font-weight: 600; }
+    .check-ok { border-left: 4px solid var(--deel-green); }
+    .check-warn { border-left: 4px solid var(--deel-orange); }
+    .check-esc { border-left: 4px solid var(--deel-red); }
+
+    /* ── RACI TABLE ── */
+    .raci-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    .raci-table th {
+      background: var(--deel-blue);
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .raci-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--deel-border);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    .raci-table tr:nth-child(even) td { background: #F8F9FC; }
+    .raci-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .r-badge { background: var(--deel-light-purple); color: var(--deel-purple); }
+    .a-badge { background: #FFECE6; color: #C0392B; }
+    .c-badge { background: #FFF3E0; color: #E67E00; }
+    .i-badge { background: #E6F9F4; color: #00875A; }
+
+    /* ── ESCALATION ── */
+    .esc-card {
+      background: white;
+      border: 1.5px solid var(--deel-border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .esc-card h3 {
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .esc-card ol, .esc-card ul {
+      padding-left: 18px;
+      font-size: 0.79rem;
+      line-height: 1.7;
+      color: var(--text-mid);
+    }
+    .esc-card ol li { margin-bottom: 4px; }
+    .esc-icon { font-size: 1.1rem; }
+    .tip {
+      background: var(--deel-light-purple);
+      border-left: 4px solid var(--deel-purple);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #3D1F99;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    .warn-box {
+      background: #FFF8E6;
+      border-left: 4px solid var(--deel-orange);
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #7A4F00;
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+
+    .sla-bar {
+      background: linear-gradient(135deg, var(--deel-purple), #9B59B6);
+      color: white;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      gap: 40px;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+    .sla-stat { text-align: center; }
+    .sla-stat strong { display: block; font-size: 1.4rem; font-weight: 800; }
+    .sla-stat span { font-size: 0.7rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    @media (max-width: 700px) {
+      header { padding: 16px 20px; }
+      .main, .legend-bar, .tabs { padding-left: 16px; padding-right: 16px; }
+      .check-grid { grid-template-columns: 1fr; }
+      .branch { flex-direction: column; align-items: center; }
+      .sla-bar { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Deel CoR — Manual Approval Process</h1>
+    <p>GSC Onboarding Team · EOR Onboarding · Slack: #wflow-success-cor-approvals</p>
+  </div>
+  <span class="badge">Internal Reference</span>
+</header>
+
+<div class="legend-bar">
+  <span style="font-size:0.72rem;font-weight:700;color:#888;margin-right:4px;">LEGEND:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#EDE9FF;border:1.5px solid #6C47FF;"></div> Trigger / Start</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#EAF6F2;border:1.5px solid #00C48C;"></div> Action Step</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFF8E6;border:1.5px solid #FFD166;"></div> Compliance Check</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFF0F0;border:1.5px solid #FF4757;"></div> Escalation</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FFF3E0;border:1.5px solid #FF8C00;"></div> Decision Point</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#E6F9F4;border:1.5px solid #00C48C;"></div> Completion</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('flow')">Process Flowchart</div>
+  <div class="tab" onclick="showTab('checks')">Compliance Checklist</div>
+  <div class="tab" onclick="showTab('rtw')">RTW Process</div>
+  <div class="tab" onclick="showTab('escalation')">Escalation Guide</div>
+  <div class="tab" onclick="showTab('raci')">RACI &amp; SLAs</div>
+</div>
+
+<div class="main">
+
+  <!-- ══════════════ TAB 1: FLOWCHART ══════════════ -->
+  <div id="tab-flow" class="panel active">
+    <div class="flow">
+
+      <!-- TRIGGER -->
+      <div class="section-label">① TRIGGER</div>
+      <div class="node n-trigger">
+        <div class="node-pill">Start</div>
+        <div class="node-title">COR Contract Created / Submitted</div>
+        <div class="node-sub">Client creates a Deel COR contract (PAYG, Milestone, or Fixed). System runs automated compliance checks.</div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- DECISION 1 -->
+      <div class="diamond-wrap">
+        <div class="diamond"><span>Auto-Sign Eligible?</span></div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label yes-label">✓ YES — Auto-signed</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-done" style="max-width:340px;">
+            <div class="node-pill">Auto Complete</div>
+            <div class="node-title">Contract Auto-Signed by Deel</div>
+            <div class="node-sub">Majority of COR contracts follow this path. No GSC action required.</div>
+          </div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label no-label">✗ NO — Flagged for Review</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-trigger" style="max-width:340px;">
+            <div class="node-pill">Manual Review Triggered</div>
+            <div class="node-title">Case appears in Workbench</div>
+            <div class="node-sub">Visible under COR Manual Approval section. GSC notified in <strong>#wflow-success-cor-approvals</strong>.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line" style="height:32px;"></div><div class="arrow-head"></div></div>
+
+      <!-- INTAKE -->
+      <div class="section-label">② WORKBENCH INTAKE — GSC Analyst</div>
+      <div class="node n-action">
+        <div class="node-pill">Step 1 — Assign Case</div>
+        <div class="node-title">Open Workbench &amp; Take Ownership</div>
+        <div class="node-sub">
+          1. Go to <strong>Workbench → COR Manual Approvals</strong> queue<br>
+          2. Set your Workbench status to <strong>"Online"</strong><br>
+          3. Cases auto-assigned; if not, use <strong>"Assign to Myself"</strong><br>
+          4. Change case status from <strong>To Do → In Progress</strong><br>
+          5. Click <strong>"Go to Task"</strong> to open the contract
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- DECISION 2 -->
+      <div class="diamond-wrap">
+        <div class="diamond"><span>RTW Check Triggered?</span></div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label yes-label">✓ YES — RTW Required</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-check" style="max-width:340px;">
+            <div class="node-pill">RTW Flow</div>
+            <div class="node-title">Handle Right to Work Check</div>
+            <div class="node-sub">See <em>RTW Process</em> tab for full detail. Key steps:<br>
+            • Notify CSM → IC uploads documents<br>
+            • Mobility Team reviews ($250 fee required)<br>
+            • RTW status must be <strong>Approved</strong> before signing</div>
+          </div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label no-label">✗ NO — Other Trigger</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-info" style="max-width:340px;">
+            <div class="node-pill">Note — Updated Scope</div>
+            <div class="node-title">Non-RTW Checks Handled Externally</div>
+            <div class="node-sub">As of latest SOP, GSC is <strong>no longer responsible</strong> for: Special Clauses, Contractor Tax Residence, Job Title/Seniority. These are handled between client/system and Legal/Compliance directly.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line" style="height:32px;"></div><div class="arrow-head"></div></div>
+
+      <!-- COMPLIANCE REVIEW -->
+      <div class="section-label">③ CONTRACT REVIEW — GSC Analyst (Step 2)</div>
+      <div class="node n-check">
+        <div class="node-pill">Step 2 — Compliance Checks</div>
+        <div class="node-title">Review Contract Against Compliant List</div>
+        <div class="node-sub">
+          Run checks across all 8 compliance criteria (see <em>Compliance Checklist</em> tab for full detail):<br><br>
+          <strong>a.</strong> Client/Contractor Legal Entity &nbsp;|&nbsp; <strong>b.</strong> Job Title &nbsp;|&nbsp; <strong>c.</strong> Special Clauses<br>
+          <strong>d.</strong> Scope of Work &nbsp;|&nbsp; <strong>e.</strong> Additional Documents &nbsp;|&nbsp; <strong>f.</strong> Stock Options<br>
+          <strong>g.</strong> Equipment &nbsp;|&nbsp; <strong>h.</strong> Start Date
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- DECISION 3 -->
+      <div class="diamond-wrap">
+        <div class="diamond"><span>Issues Found?</span></div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label no-label">Issues Requiring Escalation</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-escalate" style="max-width:340px;">
+            <div class="node-pill">Escalate</div>
+            <div class="node-title">Escalate to Compliance / Legal</div>
+            <div class="node-sub">
+              • Same-country entity issue → <strong>Compliance Jira ticket</strong><br>
+              • C-level job title → <strong>Compliance → Legal (US only)</strong><br>
+              • Special Clauses → <strong>Legal Ops Jira ticket</strong><br>
+              Change WB status to <strong>"Escalated"</strong><br>
+              Paste Jira link in WB task
+            </div>
+          </div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-check" style="max-width:340px;">
+            <div class="node-pill">Await Response</div>
+            <div class="node-title">Wait for Compliance / Legal Decision</div>
+            <div class="node-sub">WB task re-opens with status <em>Jira ticket response / GSC action needed</em> when feedback arrives.</div>
+          </div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label yes-label">Issues Fixable by GSC/CSM</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-action" style="max-width:340px;">
+            <div class="node-pill">Fix &amp; Notify</div>
+            <div class="node-title">Flag Issues to CSM / Fix Directly</div>
+            <div class="node-sub">
+              • SOW language issue → flag to CSM<br>
+              • Additional docs / stock options / wrong equipment → flag to CSM to remove<br>
+              • Backdated start date → flag to CSM to update<br>
+              • Non-English SOW → translate &amp; add to WB note
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line" style="height:32px;"></div><div class="arrow-head"></div></div>
+
+      <!-- SIGNING -->
+      <div class="section-label">④ SIGNING — GSC Analyst (Steps 3–4)</div>
+      <div class="node n-action">
+        <div class="node-pill">Step 3 — Sign as Provider</div>
+        <div class="node-title">Contract Signing</div>
+        <div class="node-sub">
+          Once contract is compliant (or changes made):<br>
+          1. Click the <strong>pen icon</strong> in the <em>"Waiting for provider to sign"</em> section<br>
+          2. Sign as Deel Provider<br>
+          3. WB case <strong>auto-completes</strong> upon signing
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- NOTIFY -->
+      <div class="section-label">⑤ POST-SIGNING — GSC Analyst (Step 5)</div>
+      <div class="node n-action">
+        <div class="node-pill">Step 5 — Notify &amp; Document</div>
+        <div class="node-title">Leave Notes &amp; Notify CSM</div>
+        <div class="node-sub">
+          • If any changes were made: leave a <strong>note in Workbench</strong> so CSM team can follow up<br>
+          • Also notify CSM in <strong>#wflow-success-shield-approvals</strong> Slack channel (temporary step)<br>
+          • If no CSM assigned (shows N/A): tag <strong>@Laura Davila</strong> or raise a Zendesk ticket to <strong>Scale Pooled</strong>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <!-- DONE -->
+      <div class="node n-done">
+        <div class="node-pill">Complete</div>
+        <div class="node-title">Case Closed — Contractor Can Now Sign</div>
+        <div class="node-sub">Contract is provider-signed. Contractor receives invitation to sign. COR contract is active once all parties have signed.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB 2: COMPLIANCE CHECKLIST ══════════════ -->
+  <div id="tab-checks" class="panel">
+    <div class="warn-box">
+      <strong>⚠️ Updated Scope (per latest SOP):</strong> GSC analysts are now primarily responsible for <strong>Right to Work (RTW)</strong> checks. Special Clauses, Contractor Tax Residence, and Job Title/Seniority are handled directly between the client/system and Legal/Compliance. The checklist below reflects the full historical requirements for reference.
+    </div>
+
+    <div class="sla-bar">
+      <div class="sla-stat"><strong>3–5</strong><span>Expected daily inflow</span></div>
+      <div class="sla-stat"><strong>3 hrs</strong><span>Max review SLA</span></div>
+      <div class="sla-stat"><strong>7 days</strong><span>Max backdated start date</span></div>
+      <div class="sla-stat"><strong>48 hrs</strong><span>CSM response window</span></div>
+    </div>
+
+    <div class="checklist">
+      <div class="check-grid">
+
+        <div class="check-item check-esc">
+          <h4>a. Client / Contractor Legal Entity</h4>
+          <ul>
+            <li>Contractor must NOT be hired in same country as the Legal Entity</li>
+            <li>If same country → escalate to <span class="escalate">Compliance (Jira)</span></li>
+            <li>If California (USA) → contract must be <span class="escalate">cancelled</span>; notify @James Moore &amp; @Maciej Dalkowski</li>
+            <li>Non-USA same-country: no Legal ticket needed</li>
+            <li>Check Assessment tab for pre-filled questionnaire</li>
+          </ul>
+        </div>
+
+        <div class="check-item check-esc">
+          <h4>b. Job Title</h4>
+          <ul>
+            <li>Title cannot be <span class="escalate">C-level (Director and above)</span></li>
+            <li>If C-level → escalate to <span class="escalate">Compliance first, then Legal (US)</span></li>
+            <li>Check Assessment tab for pre-filled questionnaire</li>
+            <li>Edit job description if not aligned with requirements</li>
+          </ul>
+        </div>
+
+        <div class="check-item check-esc">
+          <h4>c. Special Clauses</h4>
+          <ul>
+            <li>No Special Clauses allowed in the contract</li>
+            <li>If only Special Clauses triggered → <span class="escalate">Legal Ops Jira</span></li>
+            <li>If Special Clauses + other triggers → escalate both to Compliance &amp; Legal</li>
+            <li>Check Assessment tab for pre-filled questionnaire</li>
+          </ul>
+        </div>
+
+        <div class="check-item check-warn">
+          <h4>d. Scope of Work (SOW)</h4>
+          <ul>
+            <li>Client or entity name must NOT appear in job title or SOW</li>
+            <li>No prohibited keywords (cannabis, weapons, etc. — see ToS §7)</li>
+            <li>Non-English SOW: <span class="flag">translate to English</span> (Google Translate / screenshot) and add copy to WB note</li>
+            <li>Flag any issues to CSM</li>
+          </ul>
+        </div>
+
+        <div class="check-item check-warn">
+          <h4>e. Additional Documents</h4>
+          <ul>
+            <li>No Additional Documents should be attached to the contract</li>
+            <li>If found: <span class="flag">flag to CSM to remove</span></li>
+          </ul>
+        </div>
+
+        <div class="check-item check-warn">
+          <h4>f. Stock Options</h4>
+          <ul>
+            <li>No stock options may be added to the contract</li>
+            <li>If found: <span class="flag">flag to CSM to delete</span></li>
+            <li>Notify @James Moore if stock options are present</li>
+          </ul>
+        </div>
+
+        <div class="check-item check-warn">
+          <h4>g. Equipment</h4>
+          <ul>
+            <li>Only <strong>laptops</strong> and <strong>mobile phones</strong> are permitted</li>
+            <li>Any other equipment type → <span class="flag">flag to CSM to remove</span></li>
+          </ul>
+        </div>
+
+        <div class="check-item check-warn">
+          <h4>h. Start Date</h4>
+          <ul>
+            <li>Start date can be a max of <strong>7 days in the past</strong></li>
+            <li>Any start date within last 7 days is acceptable</li>
+            <li>If beyond 7 days past → <span class="flag">flag to CSM to update to today's date</span></li>
+            <li>No escalation to Compliance/Legal needed</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="tip" style="margin-top:20px;">
+        <strong>💡 False Positive Word Matches:</strong> If a word in the SOW matches the client org name (e.g. "imple" flagged for "Ximple"), you can add the term as a compliance exception in the client's MSA → Agreements → COR Agreement → Compliance Exemptions → Special keywords. Then confirm no blocker in the Slack thread.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB 3: RTW PROCESS ══════════════ -->
+  <div id="tab-rtw" class="panel">
+    <div class="tip" style="margin-bottom:20px;">
+      <strong>📌 Current GSC Responsibility:</strong> As per the latest SOP, GSC ONB Support analysts are now <strong>only responsible for Right to Work (RTW) cases</strong>. All other triggers are handled by Legal/Compliance directly.
+    </div>
+
+    <div class="flow">
+      <div class="node n-trigger">
+        <div class="node-pill">RTW Triggered</div>
+        <div class="node-title">Step 1 — Identify Review Reason</div>
+        <div class="node-sub">
+          1. Go to <strong>Workbench</strong> → filter Task Type = <em>GSC - Deel Shield</em><br>
+          2. Click <strong>"Go to Task"</strong> to open the case<br>
+          3. Confirm the specific trigger in <strong>#wflow-success-cor-approvals</strong>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <div class="node n-action">
+        <div class="node-pill">Step 2 — Notify CSM</div>
+        <div class="node-title">Inform CSM to Instruct the IC</div>
+        <div class="node-sub">
+          Notify CSM to instruct the Independent Contractor (IC) to complete the Right to Work check.<br>
+          Use macro: <em>"RTW fee not paid / Document not uploaded"</em>
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <div class="node n-check">
+        <div class="node-pill">Step 3 — Confirm RTW Submission</div>
+        <div class="node-title">Compliance Analyst: Verify Mobility Review Status</div>
+        <div class="node-sub">Once CSM confirms IC has completed the check, verify Mobility Team review status.</div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <div class="node n-action">
+        <div class="node-pill">Step 4 — Verify in Admin Portal</div>
+        <div class="node-title">Check Immigration Tab on COR Contract</div>
+        <div class="node-sub">
+          1. Go to the <strong>Immigration tab</strong> on the COR contract → Right to Work<br>
+          2. View current status (e.g. <em>In Review, Awaiting Document</em>)<br>
+          3. Scroll to bottom to see the assigned immigration specialist / Onboarding Manager
+        </div>
+      </div>
+      <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+
+      <div class="diamond-wrap">
+        <div class="diamond"><span>RTW Status?</span></div>
+      </div>
+
+      <div class="branch">
+        <div class="branch-col">
+          <div class="branch-label" style="background:#FFF3E0;color:#8A3E00;">In Review</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-check" style="max-width:340px;">
+            <div class="node-pill">Step 5 — In Review</div>
+            <div class="node-title">Check Mobility Notes &amp; Payment</div>
+            <div class="node-sub">
+              • Open case → review Mobility notes<br>
+              • Check <em>Invoices</em> section for RTW fee payment ($250)<br>
+              • If <strong>Pending Payment</strong>: inform CSM to notify client to pay<br>
+              • If fee paid: escalate in <strong>#immigration-urgent-assist</strong> or tag assigned Mobility Specialist<br>
+              • If no specialist assigned: check Admin → Country Manager → Document Check
+            </div>
+          </div>
+        </div>
+        <div class="branch-col">
+          <div class="branch-label yes-label">Approved</div>
+          <div class="arrow"><div class="arrow-line"></div><div class="arrow-head"></div></div>
+          <div class="node n-action" style="max-width:340px;">
+            <div class="node-pill">Step 6 — Approve &amp; Sign</div>
+            <div class="node-title">Proceed to Provider Signing</div>
+            <div class="node-sub">
+              • Confirm start date is <strong>current or future-dated</strong><br>
+              • Go to Contracts → <em>Waiting for provider to sign</em><br>
+              • Click the <strong>pen icon</strong> to sign as Provider<br>
+              • WB case auto-completes
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;width:100%;max-width:620px;">
+        <div class="warn-box">
+          <strong>RTW Key Rules:</strong><br>
+          • Applicant uploads docs → status becomes <em>"In Review"</em><br>
+          • Mobility approves if valid; rejects + adds notes if invalid<br>
+          • $250 fee must be paid before approval (unless nationality grants automatic RTW rights)<br>
+          • Once approved, contract signing can continue<br>
+          • If no response from CSM within <strong>48 hours</strong> → close the case (use 48hr closure macro)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB 4: ESCALATION GUIDE ══════════════ -->
+  <div id="tab-escalation" class="panel">
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">🔴</span> Escalation to Compliance Team</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">Use when: same-country legal entity (non-CA), C-level job title, or special clauses are present.</p>
+      <ol>
+        <li>Open the <strong>Privacy and Compliance Service Desk</strong> (Jira)</li>
+        <li><strong>Summary:</strong> Brief reason for escalation (e.g. "Contractor hired in same country as legal entity")</li>
+        <li><strong>Attachment:</strong> Attach the filled questionnaire from the Assessment tab</li>
+        <li><strong>Share With:</strong> Select Deel</li>
+        <li><strong>"What is your request related to?"</strong> → Select <strong>COR</strong></li>
+        <li><strong>Link to admin profile:</strong> Copy URL from WB task (e.g. admin.deel.network/contracts/xxxxx/profile)</li>
+        <li><strong>Admin Organization Profile link:</strong> Right-click the client org name in Admin to copy</li>
+        <li><strong>"Which Deel product?"</strong> → Select <strong>COR</strong></li>
+        <li><strong>Request Description:</strong> Full detail on reason for escalation. Include questionnaire answers for US contracts.</li>
+        <li><strong>"ZD Ticket?"</strong> → Select <strong>No</strong></li>
+        <li>Paste Jira ticket link into the <strong>Jira section in Workbench</strong></li>
+        <li>Change WB status to <strong>Escalated</strong></li>
+      </ol>
+      <div class="tip">Search for existing Jira tickets first using the <strong>GSCMB-5</strong> template before creating a new one.</div>
+    </div>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">⚖️</span> Escalation to Legal Team</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">Use when: special clauses present (after Compliance review), California US cases, or cases requiring legal sign-off.</p>
+      <ol>
+        <li>Open the <strong>Legal Operations Service Desk</strong> (Jira)</li>
+        <li><strong>Summary:</strong> Brief reason (e.g. "Special Clauses present in COR contract")</li>
+        <li><strong>Link to admin profile:</strong> WB task URL</li>
+        <li><strong>Admin Organization Profile link:</strong> Right-click client org name</li>
+        <li><strong>Specific contractor (yes/no):</strong> Yes</li>
+        <li><strong>Admin contract link:</strong> Same as admin profile link</li>
+        <li><strong>Contractor Work Country:</strong> Check employment country in Admin</li>
+        <li><strong>Client has signed MSA?:</strong> Go to Contract Agreement section → click MSA → verify client signature on last page</li>
+        <li><strong>Counterparty name:</strong> Click client name → scroll to Org Admin section → copy name</li>
+        <li><strong>Counterparty email:</strong> Copy email below Org Admin name</li>
+        <li><strong>Description:</strong> Full detail on escalation reason</li>
+        <li><strong>ZD ticket (yes/no):</strong> No (in most cases)</li>
+        <li>Paste Jira link into WB → set status to <strong>Escalated</strong></li>
+      </ol>
+    </div>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">👤</span> No CSM Assigned (N/A)</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">When CSM field shows N/A or success@deel.com, no CSM is assigned.</p>
+      <ol>
+        <li>Open <strong>Zendesk → Create new ticket</strong></li>
+        <li><strong>Requester:</strong> Client's POC email</li>
+        <li><strong>Assignee:</strong> Scale Pooled</li>
+        <li>Add issue description in <strong>internal note</strong> (NOT public reply)</li>
+        <li>Add Slack thread link as internal note for visibility</li>
+        <li>Leave ticket status as <strong>"Open"</strong> (not "Pending")</li>
+        <li>Return to Slack thread → comment <em>"Escalated to Scale Pooled"</em> + ZD ticket link</li>
+        <li>Tag the specific CSM assigned to ZD ticket for updates</li>
+      </ol>
+      <div class="tip">Tag <strong>@Laura Davila</strong> in the Slack thread if no CSM can be found.</div>
+    </div>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">🔧</span> No WB Task Generated (Product Bug)</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">Occasionally a COR contract requires manual approval but no WB task is created.</p>
+      <ol>
+        <li>In WB task backlog, click <strong>"Submit a Request"</strong></li>
+        <li>Select category: <strong>GSC - Manual Shield/COR</strong></li>
+        <li>Include: link to the contract, reason for manual approval in description, contract heading as Issue Summary</li>
+        <li>Monitor via the <strong>GSC - Manual Shield/COR</strong> queue in WB</li>
+      </ol>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ TAB 5: RACI & SLAs ══════════════ -->
+  <div id="tab-raci" class="panel">
+
+    <div class="sla-bar" style="margin-bottom:28px;">
+      <div class="sla-stat"><strong>3–5</strong><span>Contracts/day (expected)</span></div>
+      <div class="sla-stat"><strong>3 hrs</strong><span>Review SLA</span></div>
+      <div class="sla-stat"><strong>48 hrs</strong><span>CSM response window</span></div>
+      <div class="sla-stat"><strong>$250</strong><span>RTW fee (must be paid)</span></div>
+    </div>
+
+    <h3 style="font-size:0.9rem;margin-bottom:12px;color:var(--text-dark);">RACI Matrix</h3>
+    <table class="raci-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>RACI</th>
+          <th>Team</th>
+          <th>Primary Responsibilities</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>GSC ONB Support Analyst</strong></td>
+          <td><span class="raci-badge r-badge">R</span></td>
+          <td>EOR Onboarding Team</td>
+          <td>Conduct RTW checks, escalate to Mobility, complete provider signing, monitor #wflow-success-cor-approvals</td>
+        </tr>
+        <tr>
+          <td><strong>Compliance Team</strong></td>
+          <td><span class="raci-badge a-badge">A</span></td>
+          <td>Compliance</td>
+          <td>Approves escalations for Legal Entity, Job Title, Special Clauses. Ensures compliance adherence.</td>
+        </tr>
+        <tr>
+          <td><strong>Legal Team</strong></td>
+          <td><span class="raci-badge a-badge">A</span></td>
+          <td>Legal Operations</td>
+          <td>Approves Special Clauses escalations, California/US cases requiring legal sign-off</td>
+        </tr>
+        <tr>
+          <td><strong>Mobility Team</strong></td>
+          <td><span class="raci-badge c-badge">C</span></td>
+          <td>Mobility / Immigration</td>
+          <td>Provides RTW assessments and outcomes. Reachable via #immigration-urgent-assist</td>
+        </tr>
+        <tr>
+          <td><strong>Customer Success Manager (CSM)</strong></td>
+          <td><span class="raci-badge c-badge">C</span></td>
+          <td>DCS / CSM</td>
+          <td>Communicates with client/contractor to fix contract issues (start date, docs, equipment, etc.)</td>
+        </tr>
+        <tr>
+          <td><strong>DCS Scale Team</strong></td>
+          <td><span class="raci-badge i-badge">I</span></td>
+          <td>Scale Pooled</td>
+          <td>Informed of escalations when no CSM is assigned. Assigned via Zendesk.</td>
+        </tr>
+        <tr>
+          <td><strong>Client / Contractor</strong></td>
+          <td><span class="raci-badge i-badge">I</span></td>
+          <td>External</td>
+          <td>Informed of required actions (RTW documents, updated start dates, contract changes). Must sign contract.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:0.9rem;margin:28px 0 12px;color:var(--text-dark);">Key Contacts &amp; Channels</h3>
+    <table class="raci-table">
+      <thead>
+        <tr><th>Purpose</th><th>Contact / Channel</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>COR manual approval notifications</td><td>#wflow-success-cor-approvals</td></tr>
+        <tr><td>RTW / Immigration urgent assist</td><td>#immigration-urgent-assist</td></tr>
+        <tr><td>Compliance escalation (Jira)</td><td>Privacy &amp; Compliance Service Desk</td></tr>
+        <tr><td>Legal escalation (Jira)</td><td>Legal Operations Service Desk</td></tr>
+        <tr><td>No CSM assigned escalation</td><td>Zendesk → Scale Pooled</td></tr>
+        <tr><td>Process Owner</td><td>@Kinga Ogórek</td></tr>
+        <tr><td>Product Ops Owner</td><td>@Maciej Dalkowski</td></tr>
+        <tr><td>Product Owner</td><td>@James Moore</td></tr>
+        <tr><td>No CSM fallback</td><td>@Laura Davila</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip" style="margin-top:20px;">
+      <strong>📋 QC Checkpoints:</strong> Project owners must ensure: (1) JD/JT alignment reviewed, (2) C-level always escalated, (3) All Jira tickets linked to WB, (4) Special clauses escalated to Legal, (5) Same-country entity cases escalated, (6) Start dates corrected before signing, (7) Non-permitted equipment removed, (8) Additional docs and stock options removed before signing.
+    </div>
+  </div>
+
+</div><!-- end .main -->
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

@@ -422,6 +422,7 @@
   <div class="tab" onclick="showTab('rtw')">RTW Process</div>
   <div class="tab" onclick="showTab('escalation')">Escalation Guide</div>
   <div class="tab" onclick="showTab('raci')">RACI &amp; SLAs</div>
+  <div class="tab" onclick="showTab('exemptions')">Exemptions</div>
 </div>
 
 <div class="main">
@@ -968,6 +969,109 @@
     <div class="tip" style="margin-top:20px;">
       <strong>📋 QC Checkpoints:</strong> Project owners must ensure: (1) JD/JT alignment reviewed, (2) C-level always escalated, (3) All Jira tickets linked to WB, (4) Special clauses escalated to Legal, (5) Same-country entity cases escalated, (6) Start dates corrected before signing, (7) Non-permitted equipment removed, (8) Additional docs and stock options removed before signing.
     </div>
+  </div>
+
+
+  <!-- ══════════════ TAB 6: COMPLIANCE EXEMPTIONS ══════════════ -->
+  <div id="tab-exemptions" class="panel">
+
+    <div class="warn-box" style="margin-bottom:20px;">
+      <strong>⚠️ Important Update:</strong> <strong>Special Clauses are NO LONGER available for COR contracts — not even by exception.</strong> Exemptions are only available for Legal Entity (same-country hiring) and Job Title (C-level).
+    </div>
+
+    <h3 style="font-size:0.9rem;margin-bottom:12px;">Default Compliance Requirements &amp; Exemptions</h3>
+    <table class="raci-table" style="margin-bottom:28px;">
+      <thead>
+        <tr>
+          <th>Contract Field</th>
+          <th>Default Requirement</th>
+          <th>Exemption Allowed?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Client / Contractor Legal Entity</strong></td>
+          <td>Contractor is NOT hired in the same country as the Legal Entity</td>
+          <td><span class="raci-badge i-badge">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td><strong>Job Title</strong></td>
+          <td>Title is NOT C-level (Director and above)</td>
+          <td><span class="raci-badge i-badge">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td><strong>Special Clauses</strong></td>
+          <td>No special clauses added to contract</td>
+          <td><span class="raci-badge a-badge">✗ No — Not available, even by exception</span></td>
+        </tr>
+        <tr>
+          <td><strong>Scope of Work Description</strong></td>
+          <td>Client/entity name not in contract name, job title, or scope. No prohibited keywords (cannabis, guns, etc. — ToS §7)</td>
+          <td><span class="raci-badge a-badge">✗ No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Additional Documents</strong></td>
+          <td>No additional documents attached</td>
+          <td><span class="raci-badge a-badge">✗ No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Stock Options</strong></td>
+          <td>No stock options added</td>
+          <td><span class="raci-badge a-badge">✗ No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Equipment</strong></td>
+          <td>Only laptops and mobile phones permitted via equipment agreement</td>
+          <td><span class="raci-badge a-badge">✗ No</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="font-size:0.9rem;margin-bottom:16px;">How to Request a Compliance Exemption (3-Step Process)</h3>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">📋</span> Step 1: Complete the Compliance Questionnaire</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">Provides the full business context behind the exemption request.</p>
+      <ul style="font-size:0.79rem;line-height:1.7;color:var(--text-mid);padding-left:18px;">
+        <li>Make a copy of the <strong>Deel COR Questionnaire</strong> (Google Sheets)</li>
+        <li>Complete all relevant fields explaining the business case</li>
+        <li>This questionnaire will be used as the Supporting Document in Step 2</li>
+      </ul>
+      <div class="tip">The questionnaire may already be pre-filled during CoR contract creation — check the <strong>Assessment tab</strong> on the contract first. If filled with "N/A", ask the CSM to have the Client fill it out properly.</div>
+    </div>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">⚖️</span> Step 2: Legal Review via COHD Form</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">Raise a COR Compliance Exemption Request ticket to Legal.</p>
+      <ul style="font-size:0.79rem;line-height:1.7;color:var(--text-mid);padding-left:18px;">
+        <li><strong>Client / Org ID:</strong> Admin link to the organisation</li>
+        <li><strong>Problem Statement:</strong> Description of why the default requirement cannot be met</li>
+        <li><strong>Requested Change:</strong> Specific exemption requested (e.g. "Change Job Title to Director level")</li>
+        <li><strong>Supporting Document:</strong> Attach the completed COR Questionnaire from Step 1</li>
+      </ul>
+      <div class="tip">Ticket is submitted via the <strong>COHD form</strong> in the Ops Workbench Request Portal.</div>
+    </div>
+
+    <div class="esc-card">
+      <h3><span class="esc-icon">🔧</span> Step 3: Backend Change in Product (Post-Legal Approval)</h3>
+      <p style="font-size:0.78rem;color:var(--text-mid);margin-bottom:10px;">After Legal approves the exemption, raise a request to the Techops team.</p>
+      <ul style="font-size:0.79rem;line-height:1.7;color:var(--text-mid);padding-left:18px;">
+        <li>Use the <strong>Internal Webform</strong> or the <strong>COHD form</strong> to request the backend change</li>
+        <li>Exemptions are applied at the <strong>organizational level</strong> — they apply to all contracts for that client org</li>
+        <li>For word-match false positives (e.g. SOW word matching org name): add the term to the client's MSA → Agreements → COR Agreement → <strong>Compliance Exemptions → Special Keywords</strong></li>
+      </ul>
+    </div>
+
+    <h3 style="font-size:0.9rem;margin:24px 0 12px;">FAQs</h3>
+    <div class="esc-card">
+      <h3><span class="esc-icon">❓</span> Can interns be hired via COR?</h3>
+      <p style="font-size:0.79rem;color:var(--text-mid);line-height:1.6;">No. Interns are required to receive direct guidance and supervision, which is inconsistent with the independent contractor model. Interns should <strong>not</strong> be hired via COR.</p>
+    </div>
+    <div class="esc-card">
+      <h3><span class="esc-icon">❓</span> Can a COR contractor be hired in a corp-to-corp relationship?</h3>
+      <p style="font-size:0.79rem;color:var(--text-mid);line-height:1.6;">Yes. An independent contractor can be hired through Deel as an individual <strong>or</strong> through their own entity (corp-to-corp). Both models are supported under COR.</p>
+    </div>
+
   </div>
 
 </div><!-- end .main -->
